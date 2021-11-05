@@ -2,13 +2,11 @@ import React from 'react';
 import { Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { themeStyles } from '@styles/globalColors';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
-import { EventType, Profile, SearchHistoryProfile } from '@types';
+import { EventType, Profile } from '@types';
 import { eventManager, hapticsManager } from '@globals/injector';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ParamListBase } from '@react-navigation/native';
 import { calculateDeSoInUSD } from '@services/deSoCalculator';
-import { updateSearchHistory } from '@screens/search/services/searchHistoryHelpers';
-import { api } from '@services';
 
 interface Props {
     profile: Profile;
@@ -17,7 +15,7 @@ interface Props {
     isDarkMode?: boolean;
     navigation: StackNavigationProp<ParamListBase>;
     peekDisabled?: boolean;
-    historyEnabled?: true
+    customAction?: () => void;
 }
 
 export default class ProfileInfoUsernameComponent extends React.Component<Props> {
@@ -34,17 +32,12 @@ export default class ProfileInfoUsernameComponent extends React.Component<Props>
     }
 
     private goToProfile(): void {
-        if (this.props.peekDisabled) {
+        if (this.props.customAction) {
+            this.props.customAction();
             return;
         }
-        if (this.props.historyEnabled) {
-            const newProfile: SearchHistoryProfile = {
-                Username: this.props.profile.Username,
-                PublicKeyBase58Check: this.props.profile.PublicKeyBase58Check,
-                IsVerified: this.props.profile.IsVerified,
-                ProfilePic: api.getSingleProfileImage(this.props.profile.PublicKeyBase58Check)
-            };
-            updateSearchHistory(newProfile);
+        if (this.props.peekDisabled) {
+            return;
         }
 
         if (this.props.profile &&

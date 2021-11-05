@@ -62,6 +62,7 @@ export function ContactMessagesListCardComponent(
     return <TouchableOpacity style={[styles.touchableContainer, themeStyles.containerColorMain, themeStyles.borderColor]} activeOpacity={0.8} onPress={goToChat}>
         <View style={styles.container}>
             <MessageInfoCardComponent
+                customAction={goToChat}
                 navigation={navigation}
                 profile={contactWithMessages.ProfileEntryResponse}
                 lastMessage={contactWithMessages.LastDecryptedMessage}
