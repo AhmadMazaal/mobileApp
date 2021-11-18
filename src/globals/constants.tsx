@@ -28,4 +28,6 @@ export const constants = {
     localStorage_bitBadgesIntroduction: 'bitBadgesIntroduction',
     localStorage_draftPost: '_draftPostText',
     cloutfeed_publicKey: 'BC1YLh5pKXs8NqaUtN8Gzi3rfoAgG2VWio2NER7baDkG8T2x7wRnSwa',
+    localStorage_archivedChats: '_archivedChats',
+    localStorage_archivedChatsRecipientKeys: '_archivedChatsRecipientKeys',
 };

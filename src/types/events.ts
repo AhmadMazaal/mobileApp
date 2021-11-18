@@ -1,6 +1,6 @@
 import { NavigationProp } from '@react-navigation/core';
 import { ActionSheetConfig } from '@services/actionSheet';
-import { HiddenNFTType } from '.';
+import { ContactWithMessages, HiddenNFTType } from '.';
 import { BidEdition, Post, Profile } from './models';
 
 export interface ChangeFollowersEvent {
@@ -70,4 +70,8 @@ export interface ToggleRefreshDraftPostsEvent {
 
 export interface ToggleHideCoinPriceEvent {
     hidden: boolean;
+}
+
+export interface UpdateArchivesEvent {
+    unarchivedContact: ContactWithMessages;
 }

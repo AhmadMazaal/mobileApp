@@ -15,6 +15,7 @@ import CloutFeedButton from '@components/cloutfeedButton.component';
 import { EventType } from '@types';
 import { SharedStackScreens } from './sharedStackScreens';
 import { ChatScreen } from '@screens/chat/chat.screen';
+import ArchivedMessagesScreen from '@screens/messages/archivedMessages.screen';
 
 const MessageStack = createStackNavigator();
 
@@ -82,6 +83,17 @@ export default function MessageStackScreen() {
                 )}
                 name="Chat"
                 component={ChatScreen}
+            />
+            <MessageStack.Screen
+                options={
+                    () => (
+                        {
+                            headerTitle: 'Archived Chat',
+                        }
+                    )
+                }
+                name="ArchivedMessages"
+                component={ArchivedMessagesScreen}
             />
 
             {
