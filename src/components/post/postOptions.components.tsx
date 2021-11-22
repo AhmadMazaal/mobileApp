@@ -98,6 +98,38 @@ export class PostOptionsComponent extends React.Component<Props> {
         );
     }
 
+    private async handleDeletePost(): Promise<void> {
+        try {
+            const response = await api.hidePost(
+                globals.user.publicKey,
+                this.props.post.PostHashHex,
+                this.props.post.Body,
+                this.props.post.ImageURLs,
+                this.props.post.RepostedPostEntryResponse?.PostHashHex
+            );
+
+            const transactionHex = response.TransactionHex;
+            const signedTransactionHex = await signing.signTransaction(transactionHex);
+            await api.submitTransaction(signedTransactionHex);
+
+            if (this.props.route.name === 'Home' || this.props.route.name === 'Profile') {
+                snackbar.showSnackBar({ text: 'Your post was deleted successfully.' });
+                this.props.navigation.navigate(
+                    this.props.route.name,
+                    {
+                        deletedPost: this.props.post.PostHashHex
+                    }
+                );
+
+            } else {
+                snackbar.showSnackBar({ text: 'Your post was deleted successfully. Please reload the screen to see this change.' });
+            }
+
+        } catch (error) {
+            globals.defaultHandleError(error);
+        }
+    }
+
     private async showOwnPostOptions() {
         const isPostSaved = !!cache.savedPosts.savedPosts[this.props.post.PostHashHex];
         const savePostText = isPostSaved ? 'Unsave Post' : 'Save Post';
@@ -181,33 +213,28 @@ export class PostOptionsComponent extends React.Component<Props> {
                         }
                         break;
                     case 7:
-                        api.hidePost(
-                            globals.user.publicKey,
-                            this.props.post.PostHashHex,
-                            this.props.post.Body,
-                            this.props.post.ImageURLs,
-                            this.props.post.RepostedPostEntryResponse?.PostHashHex
-                        ).then(
-                            async p_response => {
-                                const transactionHex = p_response.TransactionHex;
-
-                                const signedTransactionHex = await signing.signTransaction(transactionHex);
-                                await api.submitTransaction(signedTransactionHex);
-
-                                if (this.props.route.name === 'Home' || this.props.route.name === 'Profile') {
-                                    Alert.alert('Success', 'Your post was deleted successfully.');
-                                    this.props.navigation.navigate(
-                                        this.props.route.name,
+                        setTimeout(
+                            () => {
+                                Alert.alert(
+                                    'Hide Post?',
+                                    'Are you sure you want to hide this post? This action cannot be undone',
+                                    [
                                         {
-                                            deletedPost: this.props.post.PostHashHex
+                                            text: 'Cancel',
+                                            onPress: () => undefined,
+                                            style: 'cancel'
+                                        },
+                                        {
+                                            text: 'Confirm',
+                                            onPress: () => this.handleDeletePost(),
+                                            style: 'destructive'
                                         }
-                                    );
+                                    ]
 
-                                } else {
-                                    Alert.alert('Success', 'Your post was deleted successfully. Please reload the screen to see this change.');
-                                }
-                            }
-                        ).catch(p_error => globals.defaultHandleError(p_error));
+                                );
+                            },
+                            250
+                        );
                         break;
                 }
             };
