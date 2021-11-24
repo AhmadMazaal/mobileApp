@@ -16,6 +16,7 @@ interface Props {
     isLarge: boolean;
     imageSize?: number;
     peekDisabled?: boolean;
+    customAction?: () => void
 }
 
 export default class MessageInfoCardComponent extends React.Component<Props> {
@@ -32,12 +33,14 @@ export default class MessageInfoCardComponent extends React.Component<Props> {
     render(): JSX.Element {
         return <View style={styles.container}>
             <ProfileInfoImageComponent
+                customAction={this.props.customAction}
                 peekDisabled={this.props.peekDisabled}
                 navigation={this.props.navigation}
                 imageSize={this.props.imageSize}
                 profile={this.props.profile} />
             <View>
                 <ProfileInfoUsernameComponent
+                    customAction={this.props.customAction}
                     peekDisabled={this.props.peekDisabled}
                     isLarge={this.props.isLarge}
                     showCreatorCoinHolding={this.props.showCreatorCoinHolding}

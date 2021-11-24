@@ -107,7 +107,7 @@ export function ProfileListCardComponent({ profile, isFollowing, handleSearchHis
     return <TouchableOpacity onPress={goToProfile} activeOpacity={1}>
         <View style={[styles.profileListCard, themeStyles.containerColorMain]}>
             <ProfileInfoCardComponent
-                historyEnabled={true}
+                customAction={goToProfile}
                 profile={profile}
                 navigation={navigation}
             />
