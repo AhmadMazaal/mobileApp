@@ -197,6 +197,7 @@ export function PostScreen({ route, navigation }: any) {
     const keyExtractor = (item: Post, index: number): string => `${item.PostHashHex}_${index.toString()}`;
 
     const renderItem = (item: Post, section: any): JSX.Element => <PostComponent
+        hasReadMore={true}
         isPostScreen={true}
         route={route}
         navigation={navigation}

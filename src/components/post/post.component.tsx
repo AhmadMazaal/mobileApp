@@ -29,6 +29,7 @@ interface Props {
     isPostScreen?: boolean;
     isDraftPost?: boolean;
     showThread?: boolean;
+    hasReadMore?: boolean;
 }
 
 interface State {
@@ -336,7 +337,7 @@ export class PostComponent extends React.Component<Props, State> {
                         <TouchableOpacity onPress={() => this.goToPost()} onLongPress={() => this.goToStats()} activeOpacity={1}>
                             <TextWithLinks
                                 navigation={this.props.navigation}
-                                numberOfLines={bodyText?.length > 280 ? 9 : 16}
+                                numberOfLines={this.props.hasReadMore ? bodyText?.length : bodyText?.length > 280 ? 9 : 16}
                                 style={[styles.bodyText, themeStyles.fontColorMain]}
                                 text={bodyText}
                             />
