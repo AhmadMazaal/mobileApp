@@ -519,7 +519,6 @@ export function CreatePostComponent(
             placeholder="Share your ideas with the world..."
             placeholderTextColor={themeStyles.fontColorSub.color}
             multiline
-            maxLength={2048}
             value={internalPostText}
             autoFocus
             inputAccessoryViewID={inputAccessoryViewId}
