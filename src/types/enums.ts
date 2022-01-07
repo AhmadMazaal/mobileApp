@@ -20,7 +20,8 @@ export enum EventType {
     ToggleRefreshDraftPosts = 18,
     ToggleHideCoinPrice = 19,
     UpdateContactsWithMessages = 20,
-    RefreshContactsWithMessages = 21
+    RefreshContactsWithMessages = 21,
+    OpenTransactionsFilter = 22
 }
 
 export enum DiscoveryType {
@@ -110,6 +111,13 @@ export enum MessageSort {
     MostFollowed = 'followers',
     MostClout = 'clout',
     LargestHolder = 'holders',
+}
+
+export enum TransactionsFilter {
+    FundTransfers = 'FundsTransfer',
+    CreatorCoinsInvestments = 'CreatorCoinsInvestments',
+    CreatorCoinsTransfers = 'CreatorCoinTransfer',
+    Diamonds = 'Diamonds'
 }
 
 export enum NftType {

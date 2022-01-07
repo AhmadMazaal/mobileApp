@@ -2,7 +2,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { Platform } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { themeStyles } from '@styles';
 import { WalletScreen } from '@screens/wallet/wallet.screen';
 import { LogoHeaderComponent } from '@components/logoHeader.component';
@@ -30,9 +30,14 @@ export default function WalletStackScreen() {
             })}
         >
             <WalletStack.Screen
-                options={{
+                options={({ navigation }) => ({
                     headerLeft: () => <LogoHeaderComponent></LogoHeaderComponent>,
-                }}
+                    headerRight: () => <TouchableOpacity
+                        style={{ marginRight: 5 }}
+                        onPress={() => navigation.push('TransactionsHistory')} activeOpacity={0.7}>
+                        <FontAwesome5 name="history" size={20} color={themeStyles.fontColorMain.color} />
+                    </TouchableOpacity>
+                })}
                 name="Wallet"
                 component={WalletScreen}
             />

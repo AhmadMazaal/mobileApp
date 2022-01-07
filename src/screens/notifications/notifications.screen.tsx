@@ -333,6 +333,76 @@ export class NotificationsScreen extends React.Component<Props, State> {
         );
     }
 
+    private async onFilterChanged(filter: NotificationsFilter) {
+        SecureStore.setItemAsync(constants.localStorage_notificationsFilter, JSON.stringify(filter)).catch(() => { return; });
+        const filteredNotifications = filterNotifications(this.state.notifications, filter, this.state.posts);
+        const filterSet = this.getFilterSet(filter);
+        const missingNotificationsCount = 50 - filteredNotifications.length;
+        const lastIndex: number = this.state.notifications.length === 0 ? 0 : this.state.notifications[this.state.notifications.length - 1].Index;
+
+        this._lastLoadMoreId = Math.floor(Math.random() * 1000);
+        this.setState(
+            {
+                filteredNotifications: filteredNotifications,
+                lastNotificationIndex: lastIndex,
+                filter: filter,
+                filterSet: filterSet,
+                isLoadingMore: false
+            }
+        );
+
+        if (missingNotificationsCount > 0) {
+            await this.loadMoreFilteredNotifications(filter, lastIndex, missingNotificationsCount);
+        }
+    }
+
+    private getFilterSet(filter: NotificationsFilter) {
+        const filterSet = filter != null && Object.keys(filter).some(filterKey => (filter as any)[filterKey]);
+        return filterSet;
+    }
+
+    private async loadMoreFilteredNotifications(filter: NotificationsFilter, lastIndex: number, count: number) {
+        let loadedCount = 0;
+
+        if (this._isMounted) {
+            this.setState({ isLoadingMore: true });
+        } else {
+            return;
+        }
+        this._lastLoadMoreId = Math.floor(Math.random() * 1000);
+        const loadingId = this._lastLoadMoreId;
+
+        let noMoreNotifications = false;
+
+        while (loadedCount < count && lastIndex !== 0 && !noMoreNotifications) {
+            const response = await api.getNotifications(globals.user.publicKey, lastIndex - 1, 100);
+            if (loadingId !== this._lastLoadMoreId) {
+                break;
+            }
+
+            noMoreNotifications = response.Notifications?.length === 0;
+
+            const newFilteredNotifications = filterNotifications(response.Notifications, filter, response.PostsByHash);
+            loadedCount += newFilteredNotifications.length;
+
+            lastIndex = response.Notifications.length === 0 ? 0 : response.Notifications[response.Notifications.length - 1].Index;
+
+            this.setState(previousValue => (
+                {
+                    notifications: this.state.notifications.concat(response.Notifications),
+                    filteredNotifications: this.state.filteredNotifications.concat(newFilteredNotifications),
+                    lastNotificationIndex: response.Notifications,
+                    profiles: Object.assign(previousValue.profiles, response.ProfilesByPublicKey),
+                    posts: Object.assign(previousValue.posts, response.PostsByHash)
+                }
+            ));
+        }
+
+        if (this._isMounted && loadingId === this._lastLoadMoreId) {
+            this.setState({ isLoadingMore: false, isLoading: false, noMoreNotifications });
+        }
+    }
+
     private renderNotification(notification: Notification): any {
         if (notification?.Metadata) {
             const profile = this.getProfile(notification);
@@ -415,76 +485,6 @@ export class NotificationsScreen extends React.Component<Props, State> {
             }
         }
         return undefined;
-    }
-
-    private async onFilterChanged(filter: NotificationsFilter) {
-        SecureStore.setItemAsync(constants.localStorage_notificationsFilter, JSON.stringify(filter)).catch(() => { return; });
-        const filteredNotifications = filterNotifications(this.state.notifications, filter, this.state.posts);
-        const filterSet = this.getFilterSet(filter);
-        const missingNotificationsCount = 50 - filteredNotifications.length;
-        const lastIndex: number = this.state.notifications.length === 0 ? 0 : this.state.notifications[this.state.notifications.length - 1].Index;
-
-        this._lastLoadMoreId = Math.floor(Math.random() * 1000);
-        this.setState(
-            {
-                filteredNotifications: filteredNotifications,
-                lastNotificationIndex: lastIndex,
-                filter: filter,
-                filterSet: filterSet,
-                isLoadingMore: false
-            }
-        );
-
-        if (missingNotificationsCount > 0) {
-            await this.loadMoreFilteredNotifications(filter, lastIndex, missingNotificationsCount);
-        }
-    }
-
-    private getFilterSet(filter: NotificationsFilter) {
-        const filterSet = filter != null && Object.keys(filter).some(filterKey => (filter as any)[filterKey]);
-        return filterSet;
-    }
-
-    private async loadMoreFilteredNotifications(filter: NotificationsFilter, lastIndex: number, count: number) {
-        let loadedCount = 0;
-
-        if (this._isMounted) {
-            this.setState({ isLoadingMore: true });
-        } else {
-            return;
-        }
-        this._lastLoadMoreId = Math.floor(Math.random() * 1000);
-        const loadingId = this._lastLoadMoreId;
-
-        let noMoreNotifications = false;
-
-        while (loadedCount < count && lastIndex !== 0 && !noMoreNotifications) {
-            const response = await api.getNotifications(globals.user.publicKey, lastIndex - 1, 100);
-            if (loadingId !== this._lastLoadMoreId) {
-                break;
-            }
-
-            noMoreNotifications = response.Notifications?.length === 0;
-
-            const newFilteredNotifications = filterNotifications(response.Notifications, filter, response.PostsByHash);
-            loadedCount += newFilteredNotifications.length;
-
-            lastIndex = response.Notifications.length === 0 ? 0 : response.Notifications[response.Notifications.length - 1].Index;
-
-            this.setState(previousValue => (
-                {
-                    notifications: this.state.notifications.concat(response.Notifications),
-                    filteredNotifications: this.state.filteredNotifications.concat(newFilteredNotifications),
-                    lastNotificationIndex: response.Notifications,
-                    profiles: Object.assign(previousValue.profiles, response.ProfilesByPublicKey),
-                    posts: Object.assign(previousValue.posts, response.PostsByHash)
-                }
-            ));
-        }
-
-        if (this._isMounted && loadingId === this._lastLoadMoreId) {
-            this.setState({ isLoadingMore: false, isLoading: false, noMoreNotifications });
-        }
     }
 
     render(): JSX.Element {

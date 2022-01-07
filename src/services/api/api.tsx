@@ -5,7 +5,7 @@ const headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Safari/605.1.15'
 };
 
-const host = 'https://bitclout.com/api/v0/';
+const host = 'https://node.deso.org/api/v0/';
 
 async function handleResponse(p_response: Response) {
     if (p_response.ok) {
@@ -37,9 +37,9 @@ const get = (p_route: string, p_useHost = true, noCache = false) => {
     ).then(p_response => handleResponse(p_response));
 };
 
-const post = (p_route: string, p_body: any) => {
+const post = (p_route: string, p_body: any, p_useHost = true,) => {
     return fetch(
-        host + p_route,
+        p_useHost ? host + p_route : p_route,
         {
             headers: headers,
             method: 'POST',
@@ -203,7 +203,8 @@ function createPost(
                 ImageURLs: p_imageUrls ? p_imageUrls : []
             },
             PostExtraData: {
-                EmbedVideoURL: p_videoLink
+                EmbedVideoURL: p_videoLink,
+                Node: '4'
             },
             Sub: '',
             CreatorBasisPoints: 0,
@@ -272,7 +273,7 @@ function getSingleProfile(p_username: string, publicKey?: string) {
 }
 
 function getSingleProfileImage(publicKey: string) {
-    const route = 'https://bitclout.com/api/v0/get-single-profile-picture/';
+    const route = 'https://node.deso.org/api/v0/get-single-profile-picture/';
     return route + publicKey;
 }
 
@@ -550,7 +551,7 @@ function getAppState() {
 }
 
 async function uploadImage(p_publicKey: string, p_jwt: string, p_image: any) {
-    const route = 'https://bitclout.com/api/v0/upload-image';
+    const route = 'https://node.deso.org/api/v0/upload-image';
 
     const formData = new FormData();
     formData.append('file', p_image);
@@ -702,6 +703,22 @@ function getMinFeeRateNanosPerKB() {
     return globals.derived ? 10000 : 1000;
 }
 
+function getTransactions(
+    publicKey: string, lastTransactionIndex?: number, limit = 20
+) {
+    const route = 'https://node.deso.org/api/v1/transaction-info';
+
+    return post(
+        route,
+        {
+            PublicKeyBase58Check: publicKey,
+            Limit: limit,
+            LastPublicKeyTransactionIndex: lastTransactionIndex
+        },
+        false
+    );
+}
+
 export const api = {
     getGlobalPosts,
     getFollowingPosts,
@@ -742,5 +759,6 @@ export const api = {
     checkFollowBack,
     authorizeDerivedKey,
     appendExtraDataToTransaction,
-    getUsersDerivedKeys
+    getUsersDerivedKeys,
+    getTransactions
 };

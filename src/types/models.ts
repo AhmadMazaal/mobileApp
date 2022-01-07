@@ -109,6 +109,7 @@ export interface NotificationCreatorCoinMetaData {
     DeSoToSellNanos: number;
     CreatorCoinToSellNanos: number;
     OperationType: string;
+    DESOLockedNanosDiff: number;
 }
 
 export interface NotificationCreatorCoinTransferMetaData {
@@ -226,4 +227,24 @@ export interface LoginButton {
     title: string;
     label: string;
     action: () => void;
+}
+
+export interface TransactionMetaData {
+    TransactorPublicKeyBase58Check: string;
+    CreatorCoinTxindexMetadata?: NotificationCreatorCoinMetaData;
+    SubmitPostTxindexMetadata?: NotificationSubmitPostMetaData;
+    FollowTxindexMetadata?: NotificationFollowMetaData;
+    LikeTxindexMetadata?: NotificationLikeMetaData;
+    CreatorCoinTransferTxindexMetadata?: NotificationCreatorCoinTransferMetaData;
+    NFTBidTxindexMetadata?: NotificationNftBidMetaData;
+    AcceptNFTBidTxindexMetadata?: NotificationNftBidMetaData;
+    BasicTransferTxindexMetadata?: NotificationBasicTransferMetaData;
+    AffectedPublicKeys?: { PublicKeyBase58Check: string, Metadata: string }[];
+}
+
+export interface Transaction {
+    TransactionIDBase58Check: string;
+    TransactionType: NotificationType;
+    TransactionMetadata: TransactionMetaData;
+    Outputs: { PublicKeyBase58Check: string, AmountNanos: number }[];
 }

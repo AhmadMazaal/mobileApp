@@ -9,6 +9,7 @@ export const constants = {
     localStorage_readonly: 'readonly',
     localStorage_messagesFilter: '_messagesFilter',
     localStorage_messagesSort: '_messagesSort',
+    localStorage_notificationsHistory: '_notificationsHistory',
     localStorage_cloutCastFeedFilter: '_cloutCastFeedFilter',
     localStorage_cloutCastFeedSort: '_cloutCastFeedSort',
     localStorage_hotFeedFilter: '_hotFeedFilter',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import CloutFeedButton from '@components/cloutfeedButton.component';
 import { globals } from '@globals/globals';
 import { BadgeScreen } from '@screens/bitBadges/screens/badge.screen';
@@ -23,6 +23,10 @@ import ProfileFollowersTab from '@screens/profile/profileFollowersTabNavigator';
 import { WalletScreen } from '@screens/wallet/wallet.screen';
 import { themeStyles } from '@styles/globalColors';
 import DraftPostsScreen from '@screens/draftPosts/draftPosts.screen';
+import { TransactionsHistoryScreen } from '@screens/transactionsHistory/transactionsHistory.screen';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { eventManager } from '@globals/injector';
+import { EventType } from '@types';
 
 const styles = StyleSheet.create(
     {
@@ -55,15 +59,33 @@ export const SharedStackScreens = [
         component: EditProfileScreen
     },
     {
-        options: ({ route }: any) => (
+        options: ({ route, navigation }: any) => (
             {
                 headerTitle: route.params ? route.params.username : 'Wallet',
-                headerBackTitle: ' '
+                headerBackTitle: ' ',
+                headerRight: () => <TouchableOpacity
+                    style={{ marginRight: 5 }}
+                    onPress={() => navigation.push('TransactionsHistory', { publicKey: route.params?.publicKey })} activeOpacity={0.7}>
+                    <FontAwesome5 name="history" size={20} color={themeStyles.fontColorMain.color} />
+                </TouchableOpacity>
             }
         )
         ,
         name: 'UserWallet',
         component: WalletScreen
+    },
+    {
+        options: {
+            headerTitle: 'Transactions',
+            headerBackTitle: ' ',
+            headerRight: () => <TouchableOpacity
+                style={{ marginRight: 5 }}
+                onPress={() => eventManager.dispatchEvent(EventType.OpenTransactionsFilter)} activeOpacity={0.7}>
+                <Ionicons name="ios-filter" size={24} color={themeStyles.fontColorMain.color} />
+            </TouchableOpacity>
+        },
+        name: 'TransactionsHistory',
+        component: TransactionsHistoryScreen
     },
     {
         options: ({ route }: any) => (
