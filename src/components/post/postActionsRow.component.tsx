@@ -128,69 +128,75 @@ export class PostActionsRow extends React.Component<Props, State> {
         if (post.PostEntryReaderState.DiamondLevelBestowed === 0) {
             this.sendDiamonds(1).then(() => undefined).catch(() => undefined);
         } else {
-            const calculateDiamondsWorth = (count: number): string => {
-                const nanos = 5000 * Math.pow(10, count);
-                const usd = calculateAndFormatDeSoInUsd(nanos);
-                return '💎 ' + String(count) + ' ($' + usd + ')';
-            };
-
-            const options: string[] = [];
-            for (let i = post.PostEntryReaderState.DiamondLevelBestowed + 1; i < 7; i++) {
-                const usd = calculateDiamondsWorth(i);
-                options.push(usd);
-            }
-
-            options.push('Cancel');
-
-            const callback = (p_optionIndex: number) => {
-                const diamondLevel = post.PostEntryReaderState.DiamondLevelBestowed + 1 + p_optionIndex;
-                if (diamondLevel < 4) {
-                    setTimeout(
-                        () => {
-                            this.sendDiamonds(diamondLevel).then(() => undefined).catch(() => undefined);
-                        },
-                        100
-                    );
-                } else {
-                    const username = this.props.post.ProfileEntryResponse.Username;
-                    setTimeout(
-                        () => {
-                            Alert.alert(
-                                'Send Diamonds',
-                                `Are you sure you want to send ${options[p_optionIndex]} to @${username}?`,
-                                [
-                                    {
-                                        text: 'No',
-                                    },
-                                    {
-                                        text: 'Yes',
-                                        onPress: () => {
-                                            this.sendDiamonds(diamondLevel).then(() => undefined).catch(() => undefined);
-                                        }
-                                    }
-                                ]
-                            );
-                        },
-                        200
-                    );
-                }
-            };
-
-            const headerDescription = options.length > 1 ?
-                'Diamonds are a way to reward great content by sending an amount of $DESO as a tip' :
-                'You have sent the maximum possible amount of diamonds to this post';
-            eventManager.dispatchEvent(
-                EventType.ToggleActionSheet,
-                {
-                    visible: true,
-                    config: {
-                        options,
-                        callback,
-                        headerDescription
-                    }
-                }
-            );
+            this.sendMultipleDiamonds();
         }
+    }
+
+    private sendMultipleDiamonds() {
+        const post = this.props.post;
+
+        const calculateDiamondsWorth = (count: number): string => {
+            const nanos = 5000 * Math.pow(10, count);
+            const usd = calculateAndFormatDeSoInUsd(nanos);
+            return '💎 ' + String(count) + ' ($' + usd + ')';
+        };
+
+        const options: string[] = [];
+        for (let i = post.PostEntryReaderState.DiamondLevelBestowed + 1; i < 7; i++) {
+            const usd = calculateDiamondsWorth(i);
+            options.push(usd);
+        }
+
+        options.push('Cancel');
+
+        const callback = (p_optionIndex: number) => {
+            const diamondLevel = post.PostEntryReaderState.DiamondLevelBestowed + 1 + p_optionIndex;
+            if (diamondLevel < 4) {
+                setTimeout(
+                    () => {
+                        this.sendDiamonds(diamondLevel).then(() => undefined).catch(() => undefined);
+                    },
+                    100
+                );
+            } else {
+                const username = this.props.post.ProfileEntryResponse.Username;
+                setTimeout(
+                    () => {
+                        Alert.alert(
+                            'Send Diamonds',
+                            `Are you sure you want to send ${options[p_optionIndex]} to @${username}?`,
+                            [
+                                {
+                                    text: 'No',
+                                },
+                                {
+                                    text: 'Yes',
+                                    onPress: () => {
+                                        this.sendDiamonds(diamondLevel).then(() => undefined).catch(() => undefined);
+                                    }
+                                }
+                            ]
+                        );
+                    },
+                    200
+                );
+            }
+        };
+
+        const headerDescription = options.length > 1 ?
+            'Diamonds are a way to reward great content by sending an amount of $DESO as a tip' :
+            'You have sent the maximum possible amount of diamonds to this post';
+        eventManager.dispatchEvent(
+            EventType.ToggleActionSheet,
+            {
+                visible: true,
+                config: {
+                    options,
+                    callback,
+                    headerDescription
+                }
+            }
+        );
     }
 
     private async sendDiamonds(diamondLevel: number) {
@@ -279,8 +285,8 @@ export class PostActionsRow extends React.Component<Props, State> {
             </TouchableOpacity>
 
             {
-                Platform.OS !== 'ios' ?
-                    <TouchableOpacity style={styles.actionButton} activeOpacity={0.5} onPress={() => this.onSendDiamonds()} onLongPress={() => this.goToStats('Diamonds')}>
+                Platform.OS !== 'ios' || true ?
+                    <TouchableOpacity style={styles.actionButton} activeOpacity={0.5} onPress={() => this.onSendDiamonds()} onLongPress={() => this.sendMultipleDiamonds()}>
                         <FontAwesome name='diamond' size={18} color={this.state.diamondLevel != null && this.state.diamondLevel > 0 ? themeStyles.diamondColor.color : '#a1a1a1'} />
                         <Text style={styles.actionText}>{this.props.post.DiamondCount}</Text>
                     </TouchableOpacity> :
