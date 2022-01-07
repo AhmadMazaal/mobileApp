@@ -1,7 +1,7 @@
 import { themeStyles } from '@styles/globalColors';
 import React from 'react';
 import { StyleSheet, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
-import { FontAwesome, SimpleLineIcons, Octicons, Entypo, AntDesign, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome, Octicons, Entypo, AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { api, cache, cloutFeedApi, getAnonymousProfile } from '@services';
 import { CloutTag, DiscoveryType, EventType, HiddenNFTType, Profile, ToggleHideNFTsEvent } from '@types';
@@ -172,7 +172,6 @@ export default class DiscoveryListComponent extends React.Component<Props, State
             }
             {this.renderListItem(<Octicons name="project" size={24} color={themeStyles.fontColorMain.color} />, 'Community Projects', DiscoveryType.CommunityProject)}
             {this.renderListItem(<FontAwesome name="line-chart" size={21} color={themeStyles.fontColorMain.color} />, 'Value Creators', DiscoveryType.ValueCreator)}
-            {this.renderListItem(<SimpleLineIcons name="user-female" size={24} color={themeStyles.fontColorMain.color} />, 'Goddesses', DiscoveryType.Goddess)}
             {this.renderListItem(<Entypo name="code" size={24} color={themeStyles.fontColorMain.color} />, 'Developers', DiscoveryType.Developer)}
 
             <Text style={[styles.featuredCreatorsText, themeStyles.fontColorSub]}>Featured Creators</Text>

@@ -26,7 +26,6 @@ export enum EventType {
 
 export enum DiscoveryType {
     ValueCreator = 'ValueCreator',
-    Goddess = 'Goddess',
     CommunityProject = 'CommunityProject',
     FeaturedCreator = 'FeaturedCreator',
     Developer = 'Developer',
