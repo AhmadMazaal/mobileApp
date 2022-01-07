@@ -257,7 +257,6 @@ export class EditProfileScreen extends Component<Props, State> {
                             style={[styles.textInput, themeStyles.fontColorMain, themeStyles.borderColor]}
                             value={this.state.description}
                             multiline={true}
-                            maxLength={180}
                             onChangeText={this.handleDescriptionChange}
                             keyboardAppearance={settingsGlobals.darkMode ? 'dark' : 'light'}
                         />
