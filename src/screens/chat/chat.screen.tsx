@@ -42,6 +42,7 @@ export function ChatScreen({ route }: Props) {
     const [paddingTop, setPaddingTop] = useState<number>(0);
     const [showScrollIcon, setShowScrollIcon] = useState(false);
     const [isScrollIconLocked, setIsScrollIconLocked] = useState(false);
+    const [showSeen, setShowSeen] = useState(false);
     const insets = useSafeAreaInsets();
 
     const sectionListRef: React.RefObject<SectionList> = useRef(null);
@@ -49,6 +50,7 @@ export function ChatScreen({ route }: Props) {
     const isMounted = useRef<boolean>(true);
     const currentScrollOffsetY = useRef<number>(0);
     const contactWithMessagesRef = useRef<ContactWithMessages>({} as ContactWithMessages);
+
     useEffect(
         () => {
             const loadMessages = route.params?.loadMessages;
@@ -79,6 +81,7 @@ export function ChatScreen({ route }: Props) {
                 renderMessages(contactWithMessages);
             }
 
+            checkSeenState();
             const unsubscribeShowKeyboard = Keyboard.addListener('keyboardWillShow', keyboardWillShow);
             const unsubscribeHideKeyboard = Keyboard.addListener('keyboardWillHide', keyboardWillHide);
             return () => {
@@ -89,6 +92,39 @@ export function ChatScreen({ route }: Props) {
         },
         []
     );
+
+    const checkSeenState = async () => {
+        try {
+            const fetchCount = 50;
+            let found = false;
+            let lastPublicKey = '';
+            while (!found) {
+                const response = await api.getMessages(
+                    route.params.contactWithMessages.PublicKeyBase58Check,
+                    false,
+                    false,
+                    false,
+                    false,
+                    fetchCount,
+                    'time',
+                    lastPublicKey
+                );
+
+                found = response.UnreadStateByContact[globals.user.publicKey] != null;
+                if (found) {
+                    const seen = response.UnreadStateByContact[globals.user.publicKey] === false;
+                    setShowSeen(seen);
+                }
+
+                if (response.OrderedContactsWithMessages.length < fetchCount) {
+                    break;
+                }
+
+                lastPublicKey = response.OrderedContactsWithMessages[response.OrderedContactsWithMessages.length - 1].PublicKeyBase58Check;
+            }
+        } catch {
+        }
+    };
 
     const keyboardWillShow = (event: KeyboardEvent): void => {
         setPaddingTop(event.endCoordinates.height - 25);
@@ -278,6 +314,8 @@ export function ChatScreen({ route }: Props) {
         if (sections.length > 0) {
             scrollToBottom();
         }
+        setShowSeen(false);
+
         try {
             const encryptedMessage = await signing.encryptShared(contactWithMessages.PublicKeyBase58Check, messageText);
             const response = await api.sendMessage(globals.user.publicKey, contactWithMessages.PublicKeyBase58Check, encryptedMessage);
@@ -321,6 +359,11 @@ export function ChatScreen({ route }: Props) {
 
     const renderSectionDate = ({ section: { date } }: any): JSX.Element => <Text style={[styles.dateText, themeStyles.fontColorSub]}>{date}</Text>;
     const renderFooter = isLoadingMore ? <ActivityIndicator color={themeStyles.fontColorMain.color} /> : <></>;
+    const renderHeader = contactWithMessagesState?.Messages?.length > 0 &&
+        contactWithMessagesState.Messages[contactWithMessagesState.Messages.length - 1].IsSender &&
+        showSeen ?
+        <Text style={[styles.seenText, themeStyles.fontColorSub]}>seen</Text> : <></>;
+
     const keyboardBehavior = Platform.OS === 'ios' ? 'position' : undefined;
     const keyboardVerticalOffset = Platform.OS === 'ios' ? 70 + insets.bottom : 0;
 
@@ -347,6 +390,7 @@ export function ChatScreen({ route }: Props) {
                         onEndReachedThreshold={3}
                         onEndReached={loadMoreMessages}
                         ListFooterComponent={renderFooter}
+                        ListHeaderComponent={renderHeader}
                         sections={sections}
                         keyExtractor={keyExtractor}
                         renderItem={renderItem}
@@ -408,6 +452,13 @@ const styles = StyleSheet.create(
             justifyContent: 'center',
             alignItems: 'center',
             borderRadius: 8
+        },
+        seenText: {
+            marginLeft: 'auto',
+            marginRight: 10,
+            fontSize: 10,
+            marginBottom: 4,
+            marginTop: -2
         }
     }
 );
