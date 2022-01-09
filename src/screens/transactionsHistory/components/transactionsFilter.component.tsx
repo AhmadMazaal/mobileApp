@@ -63,10 +63,6 @@ export class TransactionsFilterComponent extends React.Component<Props, State> {
                             value: TransactionsFilter.CreatorCoinsInvestments
                         },
                         {
-                            name: 'CC Transfers',
-                            value: TransactionsFilter.CreatorCoinsTransfers
-                        },
-                        {
                             name: 'Diamonds',
                             value: TransactionsFilter.Diamonds
                         }
