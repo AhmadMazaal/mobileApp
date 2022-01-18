@@ -78,6 +78,7 @@ export interface Post {
     IsNFT: boolean;
     SerialNumber: number;
     NumNFTCopies: number;
+    NumNFTCopiesBurned: number;
     NumNFTCopiesForSale: number;
     IsForSale?: boolean;
     HighestBidAmountNanos: number;

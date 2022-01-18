@@ -1,17 +1,13 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, View, Text, StyleSheet, Linking, Image, TouchableOpacity, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, View, Text, StyleSheet, Linking, Image, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { PostComponent } from '@components/post/post.component';
-import { HotFeedFilter, Post } from '@types';
+import { Post } from '@types';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { themeStyles } from '@styles/globalColors';
 import { globals } from '@globals/globals';
-import { api, cache, searchCloutApi } from '@services';
+import { api, cache, deSocialApi } from '@services';
 import { navigatorGlobals } from '@globals/navigatorGlobals';
 import CloutFeedLoader from '@components/loader/cloutFeedLoader.component';
-import { Ionicons } from '@expo/vector-icons';
-import { HotFeedSettingsComponent } from './hotFeedSettings.component';
-import * as SecureStore from 'expo-secure-store';
-import { constants } from '@globals/constants';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 interface Props {
@@ -24,19 +20,15 @@ interface State {
     isLoading: boolean;
     isLoadingMore: boolean;
     isRefreshing: boolean;
-    isFilterShown: boolean;
-    filter: HotFeedFilter;
 }
 
-export class HotFeedComponent extends React.Component<Props, State> {
+export class WelcomeFeedComponent extends React.Component<Props, State> {
 
     private _flatListRef: React.RefObject<FlatList>;
 
     private _currentScrollPosition = 0;
 
-    private _page = 0;
-
-    private _postHashHexes: string[] = [];
+    private _lastPostHashHex = '';
 
     private _noMoreData = false;
 
@@ -49,9 +41,7 @@ export class HotFeedComponent extends React.Component<Props, State> {
             posts: [],
             isLoading: true,
             isLoadingMore: false,
-            isRefreshing: false,
-            isFilterShown: false,
-            filter: HotFeedFilter.Today
+            isRefreshing: false
         };
 
         this._flatListRef = React.createRef();
@@ -66,9 +56,6 @@ export class HotFeedComponent extends React.Component<Props, State> {
         this.refresh();
 
         this.refresh = this.refresh.bind(this);
-        this.goToSearchClout = this.goToSearchClout.bind(this);
-        this.openSettings = this.openSettings.bind(this);
-        this.onSettingsChange = this.onSettingsChange.bind(this);
     }
 
     componentDidMount(): void {
@@ -87,8 +74,7 @@ export class HotFeedComponent extends React.Component<Props, State> {
         }
 
         this._currentScrollPosition = 0;
-        this._page = 0;
-        this._postHashHexes = [];
+        this._lastPostHashHex = '';
         this._noMoreData = false;
 
         await cache.exchangeRate.getData();
@@ -97,7 +83,7 @@ export class HotFeedComponent extends React.Component<Props, State> {
 
     private async loadPosts(p_loadMore: boolean) {
 
-        if (this.state.isLoadingMore || (this._noMoreData && this._postHashHexes.length === 0)) {
+        if (this.state.isLoadingMore || this._noMoreData) {
             return;
         }
 
@@ -106,26 +92,16 @@ export class HotFeedComponent extends React.Component<Props, State> {
         }
 
         try {
-            if (this._postHashHexes.length > 0) {
-                await this.fetchPosts(p_loadMore);
-            } else {
-                const filterKey = globals.user.publicKey + constants.localStorage_hotFeedFilter;
-                const filterString = await SecureStore.getItemAsync(filterKey);
-                const filter = filterString ? filterString as HotFeedFilter : HotFeedFilter.Today;
+            const numToFetch = 10;
+            const response: string[] = await deSocialApi.getNewbiesFeed(numToFetch, this._lastPostHashHex, globals.user.publicKey);
 
-                if (this._isMounted) {
-                    this.setState({ filter });
-                }
+            this._noMoreData = response.length < numToFetch;
 
-                const response = await searchCloutApi.getTrendingPosts(filter, this._page);
-                const maxPage = response.pages;
-                this._postHashHexes = response.posts;
-
-                this._page++;
-                this._noMoreData = this._page >= maxPage;
-
-                await this.fetchPosts(p_loadMore);
+            if (response.length > 0) {
+                this._lastPostHashHex = response[response.length - 1];
             }
+
+            await this.fetchPosts(response, p_loadMore);
 
         } catch (error) {
             globals.defaultHandleError(error);
@@ -136,12 +112,8 @@ export class HotFeedComponent extends React.Component<Props, State> {
         }
     }
 
-    async fetchPosts(p_loadMore: boolean): Promise<void> {
+    async fetchPosts(postHashHexes: string[], p_loadMore: boolean): Promise<void> {
         let allPosts: Post[] = [];
-        const batchSize = 5;
-        const postHashHexes = this._postHashHexes.slice(0, batchSize);
-        this._postHashHexes = this._postHashHexes.slice(batchSize);
-
         const promises: Promise<Post | undefined>[] = [];
 
         for (const postHashHex of postHashHexes) {
@@ -189,31 +161,8 @@ export class HotFeedComponent extends React.Component<Props, State> {
         return posts;
     }
 
-    private goToSearchClout() {
-        Linking.openURL('https://searchclout.net/');
-    }
-
-    private openSettings() {
-        this.setState({ isFilterShown: true });
-    }
-
-    private async onSettingsChange(filter: HotFeedFilter) {
-        try {
-            if (filter === this.state.filter) {
-                this.setState({ isFilterShown: false });
-                return;
-            }
-
-            const filterKey = globals.user.publicKey + constants.localStorage_hotFeedFilter;
-            await SecureStore.setItemAsync(filterKey, filter);
-
-            if (this._isMounted) {
-                this.setState({ filter, isFilterShown: false });
-                this.refresh();
-            }
-        } catch {
-            return;
-        }
+    private goToDeSocial() {
+        Linking.openURL('https://desocialworld.com');
     }
 
     render(): JSX.Element {
@@ -240,16 +189,12 @@ export class HotFeedComponent extends React.Component<Props, State> {
 
         const renderHeader = <View style={[styles.header, themeStyles.containerColorMain]}>
             <Image
-                style={styles.searchCloutLogo}
-                source={require('../../../../assets/searchclout.png')}
+                style={styles.deSocialLogo}
+                source={require('../../../../assets/desocial.png')}
             ></Image>
-            <Text style={[styles.headerLink, themeStyles.linkColor]} onPress={() => this.goToSearchClout()}>Powered by SearchClout</Text>
-            <TouchableOpacity
-                style={styles.filterButton}
-                onPress={() => this.openSettings()}
-            >
-                <Ionicons name="ios-filter" size={24} color={themeStyles.fontColorMain.color} />
-            </TouchableOpacity>
+            <View style={styles.headerLinkWrapper}>
+                <Text style={[styles.headerLink, themeStyles.linkColor]} onPress={() => this.goToDeSocial()}>Powered by DeSocialWorld</Text>
+            </View>
         </View>;
 
         return (
@@ -275,14 +220,6 @@ export class HotFeedComponent extends React.Component<Props, State> {
                         ListFooterComponent={renderFooter}
                     />
                 </View>
-                {
-                    this.state.isFilterShown &&
-                    <HotFeedSettingsComponent
-                        filter={this.state.filter}
-                        isFilterShown={this.state.isFilterShown}
-                        onSettingsChange={(filter: HotFeedFilter) => this.onSettingsChange(filter)}
-                    />
-                }
             </>
         );
     }
@@ -291,26 +228,22 @@ export class HotFeedComponent extends React.Component<Props, State> {
 const styles = StyleSheet.create(
     {
         header: {
-            paddingTop: 10,
+            paddingTop: 2,
             paddingLeft: 10,
-            paddingBottom: 5,
             flexDirection: 'row',
             alignItems: 'center'
+        },
+        headerLinkWrapper: {
+            marginBottom: 4
         },
         headerLink: {
             fontWeight: '600'
         },
-        searchCloutLogo: {
-            height: 25,
-            width: 25,
-            marginRight: 5,
+        deSocialLogo: {
+            height: 32,
+            width: 32,
+            marginRight: 0,
             borderRadius: 4
-        },
-        filterButton: {
-            marginLeft: 'auto',
-            marginRight: 8,
-            paddingRight: 4,
-            paddingLeft: 4
         }
     }
 );

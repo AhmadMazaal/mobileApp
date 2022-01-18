@@ -3,6 +3,7 @@ export * from './api/bitBadgesApi';
 export * from './api/cloutfeedApi';
 export * from './api/cloutCastApi';
 export * from './api/searchCloutApi';
+export * from './api/deSocialApi';
 export * from './api/nftApi';
 export * from './dataCaching';
 export * from './actionSheet';

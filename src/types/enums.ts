@@ -94,6 +94,7 @@ export enum HomeScreenTab {
     Hot = 'Hot',
     Global = 'Global',
     Following = 'Following',
+    Welcome = 'Welcome',
     Recent = 'Recent',
     Cast = 'Cast'
 }

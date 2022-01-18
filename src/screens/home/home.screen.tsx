@@ -12,6 +12,7 @@ import { CloutCastFeedComponent } from './components/cloutCastFeed.component';
 import { HotFeedComponent } from './components/hotFeed.component';
 import { StackNavigationProp } from '@react-navigation/stack';
 import * as Linking from 'expo-linking';
+import { WelcomeFeedComponent } from './components/welcomeFeed.component';
 
 type RouteParams = {
     Home: {
@@ -37,6 +38,8 @@ export class HomeScreen extends React.Component<Props, State> {
     private _postListComponent = React.createRef<PostListComponent>();
 
     private _cloutCastFeedComponent = React.createRef<CloutCastFeedComponent>();
+
+    private _welcomeFeedComponent = React.createRef<WelcomeFeedComponent>();
 
     private _hotFeedComponent = React.createRef<HotFeedComponent>();
 
@@ -160,6 +163,9 @@ export class HomeScreen extends React.Component<Props, State> {
             },
             {
                 name: HomeScreenTab.Recent
+            },
+            {
+                name: HomeScreenTab.Welcome
             }
         ];
 
@@ -239,6 +245,8 @@ export class HomeScreen extends React.Component<Props, State> {
             this._cloutCastFeedComponent?.current?.loadData();
         } else if (p_tabName === HomeScreenTab.Hot) {
             this._hotFeedComponent?.current?.refresh();
+        } else if (p_tabName === HomeScreenTab.Welcome) {
+            this._welcomeFeedComponent?.current?.refresh();
         } else {
             this._postListComponent?.current?.refresh();
         }
@@ -278,6 +286,12 @@ export class HomeScreen extends React.Component<Props, State> {
                         navigation={this.props.navigation}
                         api={api.getRecentPosts} />;
 
+                case HomeScreenTab.Welcome:
+                    return <WelcomeFeedComponent
+                        ref={this._welcomeFeedComponent}
+                        route={this.props.route}
+                        navigation={this.props.navigation} />;
+
                 case HomeScreenTab.Cast:
                     return <CloutCastFeedComponent
                         ref={this._cloutCastFeedComponent}
@@ -288,11 +302,13 @@ export class HomeScreen extends React.Component<Props, State> {
 
         return (
             <View style={[{ flex: 1 }, themeStyles.containerColorMain]}>
-                <TabsComponent
-                    tabs={this.state.tabs}
-                    selectedTab={this.state.selectedTab}
-                    onTabClick={(tab) => this.onTabClick(tab)}
-                />
+                <View>
+                    <TabsComponent
+                        tabs={this.state.tabs}
+                        selectedTab={this.state.selectedTab}
+                        onTabClick={(tab) => this.onTabClick(tab)}
+                    />
+                </View>
                 {
                     renderTab()
                 }

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Dimensions, StyleSheet, Text } from 'react-native';
+import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { themeStyles } from '@styles';
 
 export interface TabConfig {
@@ -16,7 +16,13 @@ interface Props {
 
 export function TabsComponent({ tabs, selectedTab, onTabClick, centerText }: Props): JSX.Element {
 
-    return <View style={[styles.container, themeStyles.containerColorMain]}>
+    return <ScrollView
+        style={[styles.container, themeStyles.containerColorMain]}
+        horizontal
+        contentContainerStyle={styles.containerContent}
+        showsHorizontalScrollIndicator={false}
+        bounces={false}
+    >
         {
             tabs.map(
                 p_tab => <TouchableOpacity
@@ -36,16 +42,19 @@ export function TabsComponent({ tabs, selectedTab, onTabClick, centerText }: Pro
                 </TouchableOpacity>
             )
         }
-    </View>;
+    </ScrollView>;
 }
 
 const styles = StyleSheet.create(
     {
         container: {
-            flexDirection: 'row',
-            alignItems: 'center',
             height: 40,
             width: '100%'
+        },
+        containerContent: {
+            alignItems: 'center',
+            height: 40,
+            // backgroundColor: 'blue'
         },
         tab: {
             height: 40,

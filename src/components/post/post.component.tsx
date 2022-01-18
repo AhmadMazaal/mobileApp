@@ -256,6 +256,12 @@ export class PostComponent extends React.Component<Props, State> {
             return <View style={{ height: 0.1, width: 0.1 }} />;
         }
 
+        const nftBurned = this.props.post?.IsNFT && this.props.post.NumNFTCopiesBurned === this.props.post.NumNFTCopies;
+
+        if (nftBurned) {
+            return <View style={{ height: 0.1, width: 0.1 }} />;
+        }
+
         return (
             <View style=
                 {
