@@ -67,6 +67,8 @@ export enum FeedType {
     Global = 'Global',
     Following = 'Following',
     Recent = 'Recent',
+    Welcome = 'Welcome',
+    Language = 'Language'
 }
 
 export enum SubscriptionNotificationType {
@@ -94,8 +96,9 @@ export enum HomeScreenTab {
     Hot = 'Hot',
     Global = 'Global',
     Following = 'Following',
-    Welcome = 'Welcome',
     Recent = 'Recent',
+    Welcome = 'Welcome',
+    Language = 'Language',
     Cast = 'Cast'
 }
 

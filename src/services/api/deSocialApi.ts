@@ -57,6 +57,19 @@ const getNewbiesFeed = (numToFetch: number, lastPostHashHex: string, posterPubli
     );
 };
 
+const getLanguageFeed = (language: string, numToFetch: number, lastPostHashHex: string, posterPublicKey: string) => {
+    const route = 'language-feed?language=' + language;
+    return post(
+        route,
+        {
+            NumToFetch: numToFetch,
+            LastPostHashHex: lastPostHashHex,
+            PosterPublicKey: posterPublicKey
+        }
+    );
+};
+
 export const deSocialApi = {
-    getNewbiesFeed
+    getNewbiesFeed,
+    getLanguageFeed
 };

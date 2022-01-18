@@ -13,6 +13,7 @@ import { HotFeedComponent } from './components/hotFeed.component';
 import { StackNavigationProp } from '@react-navigation/stack';
 import * as Linking from 'expo-linking';
 import { WelcomeFeedComponent } from './components/welcomeFeed.component';
+import { LanguageFeedComponent } from './components/languageFeed.component';
 
 type RouteParams = {
     Home: {
@@ -40,6 +41,8 @@ export class HomeScreen extends React.Component<Props, State> {
     private _cloutCastFeedComponent = React.createRef<CloutCastFeedComponent>();
 
     private _welcomeFeedComponent = React.createRef<WelcomeFeedComponent>();
+
+    private _languageFeedComponent = React.createRef<LanguageFeedComponent>();
 
     private _hotFeedComponent = React.createRef<HotFeedComponent>();
 
@@ -166,6 +169,9 @@ export class HomeScreen extends React.Component<Props, State> {
             },
             {
                 name: HomeScreenTab.Welcome
+            },
+            {
+                name: HomeScreenTab.Language
             }
         ];
 
@@ -247,6 +253,8 @@ export class HomeScreen extends React.Component<Props, State> {
             this._hotFeedComponent?.current?.refresh();
         } else if (p_tabName === HomeScreenTab.Welcome) {
             this._welcomeFeedComponent?.current?.refresh();
+        } else if (p_tabName === HomeScreenTab.Language) {
+            this._languageFeedComponent?.current?.refresh();
         } else {
             this._postListComponent?.current?.refresh();
         }
@@ -289,6 +297,12 @@ export class HomeScreen extends React.Component<Props, State> {
                 case HomeScreenTab.Welcome:
                     return <WelcomeFeedComponent
                         ref={this._welcomeFeedComponent}
+                        route={this.props.route}
+                        navigation={this.props.navigation} />;
+
+                case HomeScreenTab.Language:
+                    return <LanguageFeedComponent
+                        ref={this._languageFeedComponent}
                         route={this.props.route}
                         navigation={this.props.navigation} />;
 

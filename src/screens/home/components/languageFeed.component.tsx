@@ -1,14 +1,18 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, View, Text, StyleSheet, Linking, Image, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, View, Text, StyleSheet, Linking, Image, TouchableOpacity, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 import { PostComponent } from '@components/post/post.component';
-import { Post } from '@types';
+import { HotFeedFilter, Post } from '@types';
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { themeStyles } from '@styles/globalColors';
 import { globals } from '@globals/globals';
 import { api, cache, deSocialApi } from '@services';
 import { navigatorGlobals } from '@globals/navigatorGlobals';
 import CloutFeedLoader from '@components/loader/cloutFeedLoader.component';
+import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
+import { constants } from '@globals/constants';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { LanguageSettingsComponent } from './languageSettings.component';
 
 interface Props {
     navigation: StackNavigationProp<ParamListBase>;
@@ -20,9 +24,11 @@ interface State {
     isLoading: boolean;
     isLoadingMore: boolean;
     isRefreshing: boolean;
+    isSettingsShown: boolean;
+    language: string;
 }
 
-export class WelcomeFeedComponent extends React.Component<Props, State> {
+export class LanguageFeedComponent extends React.Component<Props, State> {
 
     private _flatListRef: React.RefObject<FlatList>;
 
@@ -41,7 +47,9 @@ export class WelcomeFeedComponent extends React.Component<Props, State> {
             posts: [],
             isLoading: true,
             isLoadingMore: false,
-            isRefreshing: false
+            isRefreshing: false,
+            isSettingsShown: false,
+            language: HotFeedFilter.Today
         };
 
         this._flatListRef = React.createRef();
@@ -92,8 +100,16 @@ export class WelcomeFeedComponent extends React.Component<Props, State> {
         }
 
         try {
+
+            const languageKey = globals.user.publicKey + constants.localStorage_languageFeedLanguage;
+            const languageString = await SecureStore.getItemAsync(languageKey);
+            const language = languageString || 'en';
             const numToFetch = 6;
-            const response: string[] = await deSocialApi.getNewbiesFeed(numToFetch, this._lastPostHashHex, globals.user.publicKey);
+            const response: string[] = await deSocialApi.getLanguageFeed(language, numToFetch, this._lastPostHashHex, globals.user.publicKey);
+
+            if (this._isMounted) {
+                this.setState({ language });
+            }
 
             this._noMoreData = response.length < numToFetch;
 
@@ -114,6 +130,7 @@ export class WelcomeFeedComponent extends React.Component<Props, State> {
 
     async fetchPosts(postHashHexes: string[], p_loadMore: boolean): Promise<void> {
         let allPosts: Post[] = [];
+
         const promises: Promise<Post | undefined>[] = [];
 
         for (const postHashHex of postHashHexes) {
@@ -165,6 +182,29 @@ export class WelcomeFeedComponent extends React.Component<Props, State> {
         Linking.openURL('https://desocialworld.com');
     }
 
+    private openSettings() {
+        this.setState({ isSettingsShown: true });
+    }
+
+    private async onSettingsChange(language: string) {
+        try {
+            if (language === this.state.language) {
+                this.setState({ isSettingsShown: false });
+                return;
+            }
+
+            const languageKey = globals.user.publicKey + constants.localStorage_languageFeedLanguage;
+            await SecureStore.setItemAsync(languageKey, language);
+
+            if (this._isMounted) {
+                this.setState({ language, isSettingsShown: false });
+                this.refresh();
+            }
+        } catch {
+            return;
+        }
+    }
+
     render(): JSX.Element {
         if (this.state.isLoading) {
             return <CloutFeedLoader />;
@@ -195,6 +235,12 @@ export class WelcomeFeedComponent extends React.Component<Props, State> {
             <View style={styles.headerLinkWrapper}>
                 <Text style={[styles.headerLink, themeStyles.linkColor]} onPress={() => this.goToDeSocial()}>Powered by DeSocialWorld</Text>
             </View>
+            <TouchableOpacity
+                style={styles.filterButton}
+                onPress={() => this.openSettings()}
+            >
+                <Ionicons name="ios-filter" size={24} color={themeStyles.fontColorMain.color} />
+            </TouchableOpacity>
         </View>;
 
         return (
@@ -220,6 +266,14 @@ export class WelcomeFeedComponent extends React.Component<Props, State> {
                         ListFooterComponent={renderFooter}
                     />
                 </View>
+                {
+                    this.state.isSettingsShown &&
+                    <LanguageSettingsComponent
+                        language={this.state.language}
+                        isSettingsShow={this.state.isSettingsShown}
+                        onSettingsChange={(language: string) => this.onSettingsChange(language)}
+                    />
+                }
             </>
         );
     }
@@ -244,6 +298,12 @@ const styles = StyleSheet.create(
             width: 32,
             marginRight: 0,
             borderRadius: 4
+        },
+        filterButton: {
+            marginLeft: 'auto',
+            marginRight: 8,
+            paddingRight: 4,
+            paddingLeft: 4
         }
     }
 );

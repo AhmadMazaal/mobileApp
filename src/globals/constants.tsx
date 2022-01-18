@@ -13,6 +13,7 @@ export const constants = {
     localStorage_cloutCastFeedFilter: '_cloutCastFeedFilter',
     localStorage_cloutCastFeedSort: '_cloutCastFeedSort',
     localStorage_hotFeedFilter: '_hotFeedFilter',
+    localStorage_languageFeedLanguage: '_languageFeedLanguage',
     localStorage_defaultFeed: '_defaultFeed',
     localStorage_hiddenNFTType: '_hiddenNFTType',
     localStorage_cloutCastFeedEnabled: '_cloutCastFeedEnabled',

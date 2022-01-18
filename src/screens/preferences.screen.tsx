@@ -233,6 +233,14 @@ export class PreferencesScreen extends React.Component<Props, State>{
                     {
                         name: 'Recent',
                         value: FeedType.Recent
+                    },
+                    {
+                        name: 'Welcome',
+                        value: FeedType.Welcome
+                    },
+                    {
+                        name: 'Language',
+                        value: FeedType.Language
                     }
                 ]}
                 value={this.state.feed}
