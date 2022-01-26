@@ -38,10 +38,10 @@ export interface AuthenticatedUserEncryptionKey {
 export interface DerivedAuthentication {
     accessSignature: string;
     derivedJwt: string;
-    derivedPublicKey: string;
+    derivedPublicKeyBase58Check: string;
     compressedDerivedPublicKey: string;
     derivedSeedHex: string;
     expirationBlock: number;
     jwt: string;
-    publicKey: string;
+    publicKeyBase58Check: string;
 }

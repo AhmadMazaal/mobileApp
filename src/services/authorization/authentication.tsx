@@ -103,8 +103,8 @@ function encryptDerivedAuthenticatedUser(derivedAuthentication: DerivedAuthentic
     expireDate.setDate(expireDate.getDate() + 26);
 
     const derivedAuthenticatedUser: DerivedAuthenticatedUser = {
-        publicKey: derivedAuthentication.publicKey,
-        derivedPublicKey: derivedAuthentication.derivedPublicKey,
+        publicKey: derivedAuthentication.publicKeyBase58Check,
+        derivedPublicKey: derivedAuthentication.derivedPublicKeyBase58Check,
         compressedDerivedPublicKey: derivedAuthentication.compressedDerivedPublicKey,
         expirationBlock: derivedAuthentication.expirationBlock,
         encryptedDerivedSeedHex: crypto.aesEncrypt(iv, randomKey, Buffer.from(derivedAuthentication.derivedSeedHex)),

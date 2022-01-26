@@ -20,18 +20,18 @@ export async function authenticateWithDeSoIdentity(publicKey?: string): Promise<
     if (response.type === 'success') {
         try {
             const derivedAuthentication: DerivedAuthentication = response.params;
-            if (publicKey && publicKey !== derivedAuthentication.publicKey) {
+            if (publicKey && publicKey !== derivedAuthentication.publicKeyBase58Check) {
                 Alert.alert('Authentication Failed', 'The authorized account does not match your public key ' + publicKey);
                 globals.onLogout();
                 return false;
             }
 
             derivedAuthentication.expirationBlock = Number(derivedAuthentication.expirationBlock);
-            derivedAuthentication.compressedDerivedPublicKey = crypto.compressPublicKey(derivedAuthentication.derivedPublicKey);
+            derivedAuthentication.compressedDerivedPublicKey = crypto.compressPublicKey(derivedAuthentication.derivedPublicKeyBase58Check);
 
             const authorizationResponse = await api.authorizeDerivedKey(
-                derivedAuthentication.publicKey,
-                derivedAuthentication.derivedPublicKey,
+                derivedAuthentication.publicKeyBase58Check,
+                derivedAuthentication.derivedPublicKeyBase58Check,
                 derivedAuthentication.accessSignature,
                 derivedAuthentication.expirationBlock,
                 false
@@ -46,14 +46,14 @@ export async function authenticateWithDeSoIdentity(publicKey?: string): Promise<
 
             await api.submitTransaction(signedTransaction);
             await wait(3000);
-            const derivedKeys = await api.getUsersDerivedKeys(derivedAuthentication.publicKey);
+            const derivedKeys = await api.getUsersDerivedKeys(derivedAuthentication.publicKeyBase58Check);
 
-            if (derivedKeys.DerivedKeys[derivedAuthentication.derivedPublicKey]?.IsValid) {
+            if (derivedKeys.DerivedKeys[derivedAuthentication.derivedPublicKeyBase58Check]?.IsValid) {
                 const { derivedAuthenticatedUser, key } = authentication.encryptDerivedAuthenticatedUser(derivedAuthentication);
                 await authentication.addAuthenticatedUser(derivedAuthenticatedUser, key);
-                await SecureStore.setItemAsync(constants.localStorage_publicKey, derivedAuthentication.publicKey);
+                await SecureStore.setItemAsync(constants.localStorage_publicKey, derivedAuthentication.publicKeyBase58Check);
                 await SecureStore.setItemAsync(constants.localStorage_readonly, 'false');
-                globals.user = { publicKey: derivedAuthentication.publicKey, username: '' };
+                globals.user = { publicKey: derivedAuthentication.publicKeyBase58Check, username: '' };
                 globals.readonly = false;
                 globals.derived = true;
                 globals.onLoginSuccess();
