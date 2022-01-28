@@ -83,7 +83,10 @@ export function PostScreen({ route, navigation }: any) {
         if (p_response?.PostFound) {
             const backendPost = p_response.PostFound as Post;
             backendPost.Comments = backendPost.Comments ? backendPost.Comments : [];
-            lastCommentPostHashHex.current = backendPost.Comments[backendPost.Comments.length - 1].PostHashHex;
+
+            if (backendPost.Comments.length > 0) {
+                lastCommentPostHashHex.current = backendPost.Comments[backendPost.Comments.length - 1].PostHashHex;
+            }
 
             backendPost.Comments = backendPost.Comments.filter(p_comment => !!p_comment.ProfileEntryResponse);
 
