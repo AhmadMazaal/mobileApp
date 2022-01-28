@@ -15,6 +15,7 @@ export function PostScreen({ route, navigation }: any) {
     const [commentIndex, setCommentIndex] = useState(0);
     const [sections, setSections] = useState<any>({});
     const noMoreData = useRef(false);
+    const lastCommentPostHashHex = useRef('');
 
     const isMounted = useRef(true);
 
@@ -82,6 +83,8 @@ export function PostScreen({ route, navigation }: any) {
         if (p_response?.PostFound) {
             const backendPost = p_response.PostFound as Post;
             backendPost.Comments = backendPost.Comments ? backendPost.Comments : [];
+            lastCommentPostHashHex.current = backendPost.Comments[backendPost.Comments.length - 1].PostHashHex;
+
             backendPost.Comments = backendPost.Comments.filter(p_comment => !!p_comment.ProfileEntryResponse);
 
             if (route.params?.newComment && route.params?.newComment.ProfileEntryResponse) {
@@ -150,6 +153,13 @@ export function PostScreen({ route, navigation }: any) {
             p_response => {
                 const backendPost = p_response.PostFound as Post;
                 if (backendPost.Comments?.length > 0) {
+                    const newLastComment = backendPost.Comments[backendPost.Comments.length - 1].PostHashHex;
+                    if (newLastComment === lastCommentPostHashHex.current) {
+                        noMoreData.current = true;
+                        return;
+                    }
+                    lastCommentPostHashHex.current = newLastComment;
+
                     const filteredComments = backendPost.Comments.filter(p_comment => !!p_comment.ProfileEntryResponse);
                     const newComments = post.Comments.concat(filteredComments);
 
