@@ -70,9 +70,11 @@ export default class ProfileInfoModalComponent extends React.Component<Props, St
         this.goToProfile = this.goToProfile.bind(this);
         this.close = this.close.bind(this);
         this.init(imageUri);
-        setTimeout(() => {
-            this.getNotificationSubscriptions();
-        }, 1000);
+        if (!globals.readonly) {
+            setTimeout(() => {
+                this.getNotificationSubscriptions();
+            }, 1000);
+        }
     }
 
     componentDidMount(): void {

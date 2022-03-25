@@ -254,11 +254,11 @@ export default function App(): JSX.Element {
       setLoading(true);
     }
     initCache();
-
+    const savedPostsCallback = globals.readonly ? ()=>undefined : cache.savedPosts.reloadData;
     Promise.all(
       [
         cache.user.getData(),
-        cache.savedPosts.reloadData()
+        savedPostsCallback(),
       ]
     ).then(
       async p_responses => {
